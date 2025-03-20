@@ -1,41 +1,36 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import quizList, { Quiz } from "../const/quiz";
+import useQuizStore from "../store/quizStore";
+import quizList from "../const/quiz";
 
 const QuizPage = () => {
-  const [userAnser, setUserAnswer] = React.useState("");
+  const { quiz, userAnswer, setQuiz, setUserAnswer } = useQuizStore();
   const navigate = useNavigate();
-  const [quiz, setQuiz] = React.useState<Quiz>(
-    quizList[Math.floor(Math.random() * quizList.length)]
-  );
-  // ボタン入力カウント
   const [count, setCount] = React.useState(0);
 
-  // クイズをquizListからランダムに選択
-
+  //初期表示
   useEffect(() => {
-    if (quizList.length > 0) {
-      setQuiz(quizList[Math.floor(Math.random() * quizList.length)]);
-    }
-  }, []);
+    setQuiz(quizList[Math.floor(Math.random() * quizList.length)]);
+    setUserAnswer("");
+  }, [setQuiz]);
 
   // 問題文と答えを比較
   React.useEffect(() => {
     if (!quiz) return;
     if (
-      userAnser === quiz.correct_answer ||
-      quiz.correct_answer.length === userAnser.length
+      userAnswer === quiz.correct_answer ||
+      userAnswer.length === quiz.correct_answer.length
     ) {
       // ページ遷移
       navigate("/result");
     }
-  }, [navigate, quiz, userAnser]);
+  }, [navigate, quiz, userAnswer]);
 
   // ボタン押下時の処理
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     setCount(count + 1);
     console.log(count);
-    setUserAnswer(userAnser + e.currentTarget.textContent);
+    setUserAnswer(userAnswer + e.currentTarget.textContent);
   };
 
   // 配列をシャッフルする関数
@@ -69,7 +64,7 @@ const QuizPage = () => {
     <div>
       <h1>問題</h1>
       <p>{quiz?.question}</p>
-      <p>答え：{userAnser}</p>
+      <p>答え：{userAnswer}</p>
       <div className="button">{createButton()}</div>
     </div>
   );
