@@ -85,6 +85,17 @@ const QuizPage = () => {
     return katakana.charAt(Math.floor(Math.random() * katakana.length));
   };
 
+  //ランダムなアルファベットを生成する関数
+  const getRandomAlphabet = () => {
+    const alphabet = "abcdefghijklmnopqrstuvwxyz";
+    return alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+  };
+
+  //ランダムな数字を生成する関数
+  const getRandomNumber = (): string => {
+    return Math.floor(Math.random() * 10).toString();
+  };
+
   // ボタンを生成
   const createButton = () => {
     if (!quiz) return;
@@ -96,11 +107,15 @@ const QuizPage = () => {
     ].map((v) => v.charAt(count));
 
     //一時配列から重複を削除したSetを作成し、足りない分をランダムな文字で埋める
-    let choicesArraySet = new Set(tempChoicesArray);
+    let choicesArraySet = new Set(tempChoicesArray.filter((v) => v));
     while (choicesArraySet.size !== tempChoicesArray.length) {
       let char = /[ァ-ヴー・]/.test(tempChoicesArray[0])
         ? getRandomKatakana()
-        : getRandomHiragana();
+        : /[ぁ-ん]/.test(tempChoicesArray[0])
+        ? getRandomHiragana()
+        : /[a-z]/.test(tempChoicesArray[0])
+        ? getRandomAlphabet()
+        : getRandomNumber();
       choicesArraySet.add(char);
     }
 
