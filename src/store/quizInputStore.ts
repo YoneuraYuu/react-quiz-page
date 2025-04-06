@@ -6,6 +6,7 @@ interface QuizInputStore {
   nextIndex: number;
   setQuizInputs: (quizes: Quiz[]) => void;
   incrementIndex: () => void;
+  resetIndex: () => void;
 }
 
 const useQuizInputStore = create<QuizInputStore>((set) => ({
@@ -20,6 +21,7 @@ const useQuizInputStore = create<QuizInputStore>((set) => ({
       // 配列サイズとインデックスが等しい場合(オーバーしている場合)は0にリセット
       return { nextIndex: nextIndex >= quizInputs.length ? 0 : nextIndex };
     }),
+  resetIndex: () => set(() => ({ nextIndex: 0 })),
 }));
 
 export default useQuizInputStore;

@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 const Input = () => {
   const [parsedContent, setParsedContent] = useState<string[][]>([]); // 行ごとにタブで分割した配列
-  const { setQuizInputs } = useQuizInputStore();
+  const { setQuizInputs, resetIndex } = useQuizInputStore();
   const { setInputFlag } = useControllStore();
   const navigate = useNavigate();
 
@@ -55,8 +55,9 @@ const Input = () => {
       });
 
     setQuizInputs(quizArray); // quizInputsに格納
-    alert("クイズデータが保存されました！");
+    alert("クイズデータをセットしました！");
     setInputFlag(true); // Inputフラグをtrueに設定
+    resetIndex(); // インデックスをリセット
     console.log(quizArray); // デバッグ用にコンソールに出力
     navigate("/"); // トップページに遷移
   };
@@ -67,6 +68,15 @@ const Input = () => {
       <input type="file" accept=".txt" onChange={handleFileChange} />{" "}
       {/* ファイル選択 */}
       <div>
+        <p>ファイルとしては.txtのみ受け付ける</p>
+        <p>問題文、答え、補足、ダミー1,2,3をtab文字で区切って取り込む</p>
+        <p>
+          補足を入力しない場合、答え(タブ文字)(タブ文字)ダミー1,2,3の形で入力する
+        </p>
+        <p>例）</p>
+        <p>
+          「なぜ山に登るのか」と問われ「そこに山があるから」と答えた、有名な登山家は誰でしょう？&emsp;マロリー&emsp;ジョージ・マロリー&emsp;ヒラリー&emsp;スミス&emsp;ロウ
+        </p>
         <h2>入力内容:</h2>
         <ul>
           {parsedContent.map((line, index) => (
