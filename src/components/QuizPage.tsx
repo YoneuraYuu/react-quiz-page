@@ -42,6 +42,8 @@ const CenteredCardContent = styled(CardContent)`
   padding-top: 25px;
 `;
 
+const CHOICES_NUM = 4; //選択肢の数
+
 const QuizPage = () => {
   const { quiz, userAnswer, setQuiz, setUserAnswer, setPushPoint } =
     useQuizStore();
@@ -77,7 +79,7 @@ const QuizPage = () => {
     ].map((v) => v.charAt(count));
 
     let choicesArraySet = new Set(tempChoicesArray.filter((v) => v));
-    while (choicesArraySet.size !== tempChoicesArray.length) {
+    while (choicesArraySet.size !== CHOICES_NUM) {
       let char = /[ァ-ヴー・]/.test(tempChoicesArray[0])
         ? getRandomKatakana()
         : /[ぁ-ん]/.test(tempChoicesArray[0])
