@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { JSX, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Card, CardContent, Button, Stack, styled } from "@mui/material";
 import useQuizStore from "../store/quizStore";
@@ -36,12 +36,104 @@ const QuizPage = () => {
   const { quiz, userAnswer, setQuiz, setUserAnswer } = useQuizStore();
   const navigate = useNavigate();
   const [count, setCount] = React.useState(0);
+  const [displayedQuestion, setDisplayedQuestion] = React.useState(""); //表示中の質問
+  const [buttons, setButtons] = React.useState<JSX.Element[]>([]); //回答ボタンの配列
+  const intervalId = React.useRef<NodeJS.Timeout | null>(null); // タイマーID
+
+  // ボタン押下時の処理
+  // createButtonでhandleClickを利用しているので、useCallbackでメモ化する
+  // 依存配列にcountを追加することで、countが変わったときにhandleClickが再生成される
+  const handleClick = React.useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      setCount(count + 1);
+      console.log(count);
+      setUserAnswer(userAnswer + e.currentTarget.textContent);
+    },
+    [count, setUserAnswer, userAnswer]
+  );
+
+  // ボタンを生成する関数をuseCallbackでメモ化
+  // useEffect内でcreateButtonを使用するため、依存配列にquizとcountを追加
+  const createButton = React.useCallback((): JSX.Element[] => {
+    if (!quiz) return []; // quizがundefinedの場合は空の配列を返す
+
+    const tempChoicesArray = [
+      quiz.correct_answer,
+      ...quiz.incorrect_answers,
+    ].map((v) => v.charAt(count));
+
+    let choicesArraySet = new Set(tempChoicesArray.filter((v) => v));
+    while (choicesArraySet.size !== tempChoicesArray.length) {
+      let char = /[ァ-ヴー・]/.test(tempChoicesArray[0])
+        ? getRandomKatakana()
+        : /[ぁ-ん]/.test(tempChoicesArray[0])
+        ? getRandomHiragana()
+        : /[a-z]/.test(tempChoicesArray[0])
+        ? getRandomAlphabet()
+        : getRandomNumber();
+      choicesArraySet.add(char);
+    }
+
+    return shuffleArray(Array.from(choicesArraySet)).map((v, index) => (
+      <Button
+        key={index}
+        onClick={handleClick}
+        variant="contained"
+        sx={{
+          width: "100px",
+          height: "100px",
+          fontSize: "20px",
+          fontWeight: "bold",
+        }}
+      >
+        {v}
+      </Button>
+    ));
+  }, [quiz, count, handleClick]);
 
   //初期表示
   useEffect(() => {
-    setQuiz(quizList[Math.floor(Math.random() * quizList.length)]);
+    const selectedQuiz = quizList[Math.floor(Math.random() * quizList.length)];
+    setQuiz(selectedQuiz);
     setUserAnswer("");
-  }, [setQuiz]);
+    setDisplayedQuestion("");
+    console.log(selectedQuiz);
+
+    //タイマーを設定
+    if (selectedQuiz?.question) {
+      const id = setInterval(() => {
+        setDisplayedQuestion((prev) => {
+          const nextChar = selectedQuiz.question.charAt(prev.length);
+          return prev + nextChar;
+        });
+      }, 200);
+      intervalId.current = id;
+    }
+
+    // strictモードで2回実行されるので、タイマーをクリアする必要がある
+    // 2回目のuseEffectでクリーンアップ関数を実行することで、タイマーをクリアする
+    return () => {
+      if (intervalId.current) {
+        clearInterval(intervalId.current);
+      }
+    };
+  }, [setQuiz, setUserAnswer]);
+
+  // quizが設定された後にボタンを生成
+  useEffect(() => {
+    if (quiz) {
+      setButtons(createButton());
+    }
+  }, [quiz, count, createButton]); //countを依存配列に追加
+
+  //表示文字列を監視し、もとのクイズ文と一致したらタイマー停止
+  useEffect(() => {
+    if (displayedQuestion === quiz?.question) {
+      if (intervalId.current) {
+        clearInterval(intervalId.current);
+      }
+    }
+  }, [displayedQuestion, quiz, intervalId]);
 
   // 問題文と答えを比較
   React.useEffect(() => {
@@ -54,13 +146,6 @@ const QuizPage = () => {
       navigate("/result");
     }
   }, [navigate, quiz, userAnswer]);
-
-  // ボタン押下時の処理
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    setCount(count + 1);
-    console.log(count);
-    setUserAnswer(userAnswer + e.currentTarget.textContent);
-  };
 
   // 配列をシャッフルする関数
   const shuffleArray = (array: string[]) => {
@@ -96,50 +181,6 @@ const QuizPage = () => {
     return Math.floor(Math.random() * 10).toString();
   };
 
-  // ボタンを生成
-  const createButton = () => {
-    if (!quiz) return;
-
-    //選択肢から先頭1文字ずつ取り出して一時配列を作る
-    const tempChoicesArray = [
-      quiz.correct_answer,
-      ...quiz.incorrect_answers,
-    ].map((v) => v.charAt(count));
-
-    //一時配列から重複を削除したSetを作成し、足りない分をランダムな文字で埋める
-    let choicesArraySet = new Set(tempChoicesArray.filter((v) => v));
-    while (choicesArraySet.size !== tempChoicesArray.length) {
-      let char = /[ァ-ヴー・]/.test(tempChoicesArray[0])
-        ? getRandomKatakana()
-        : /[ぁ-ん]/.test(tempChoicesArray[0])
-        ? getRandomHiragana()
-        : /[a-z]/.test(tempChoicesArray[0])
-        ? getRandomAlphabet()
-        : getRandomNumber();
-      choicesArraySet.add(char);
-    }
-
-    console.log(count);
-    //選択肢をシャッフルしてボタンを生成
-    return shuffleArray(Array.from(choicesArraySet)).map((v, index) => {
-      return (
-        <Button
-          key={index}
-          onClick={handleClick}
-          variant="contained"
-          sx={{
-            width: "100px",
-            height: "100px",
-            fontSize: "20px",
-            fontWeight: "bold",
-          }}
-        >
-          {v}
-        </Button>
-      );
-    });
-  };
-
   return (
     <div>
       <CenteredBox>
@@ -147,7 +188,7 @@ const QuizPage = () => {
           <StyledCard className="questionCard" variant="outlined">
             <CardContent>
               <h1>問題</h1>
-              <p>{quiz?.question}</p>
+              <p>{displayedQuestion}</p>
             </CardContent>
           </StyledCard>
         </CenteredBox>
@@ -168,7 +209,7 @@ const QuizPage = () => {
           }}
         >
           <Stack direction="row" spacing={2}>
-            {createButton()}
+            {buttons}
           </Stack>
         </CenteredBox>
       </CenteredBox>
