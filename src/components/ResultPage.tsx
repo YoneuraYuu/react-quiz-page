@@ -2,6 +2,8 @@ import React, { useEffect } from "react";
 import useQuizStore from "../store/quizStore";
 import { useNavigate } from "react-router-dom";
 import { Box, Button, Card, styled, Typography, useTheme } from "@mui/material";
+import useQuizInputStore from "../store/quizInputStore";
+import useControllStore from "../store/controllStore";
 
 const StyledBox = styled(Box)`
   text-align: center;
@@ -9,7 +11,9 @@ const StyledBox = styled(Box)`
 `;
 
 const ResultPage = () => {
-  const { quiz, userAnswer, setUserAnswer } = useQuizStore();
+  const { quiz, userAnswer, pushPoint, setUserAnswer } = useQuizStore();
+  const { quizInputs, incrementIndex } = useQuizInputStore();
+  const { inputFlag } = useControllStore(); // controllStoreからinputFlagを取得
   const navigate = useNavigate();
   const theme = useTheme();
 
@@ -21,6 +25,10 @@ const ResultPage = () => {
   const result = userAnswer === quiz?.correct_answer ? "正解" : "不正解";
 
   const handleClick = () => {
+    if (inputFlag && quizInputs) {
+      //inputデータがある場合、次の問題に進むため、インデックスを更新
+      incrementIndex();
+    }
     setUserAnswer("");
     navigate("/");
   };
@@ -37,6 +45,14 @@ const ResultPage = () => {
             }}
           >
             <h1>{result}</h1>
+            <br />
+            <Typography variant="body1">
+              <strong>問題：{quiz?.question}</strong>
+            </Typography>
+            <br />
+            <Typography variant="body1">
+              <strong>押しポイント：{pushPoint}</strong>
+            </Typography>
             <br />
             <Typography variant="body1">
               <strong>答え：{quiz?.correct_answer}</strong>

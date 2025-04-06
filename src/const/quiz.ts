@@ -1,11 +1,4 @@
-//クイズのtype
-export type Quiz = {
-  id: number;
-  correct_answer: string;
-  incorrect_answers: string[];
-  question: string;
-  description: string;
-};
+import { Quiz } from "../types/quiz";
 
 //クイズ配列
 const quizList: Quiz[] = [
