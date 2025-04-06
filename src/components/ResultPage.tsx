@@ -29,6 +29,7 @@ const ResultPage = () => {
       //inputデータがある場合、次の問題に進むため、インデックスを更新
       incrementIndex();
     }
+
     setUserAnswer("");
     navigate("/");
   };
