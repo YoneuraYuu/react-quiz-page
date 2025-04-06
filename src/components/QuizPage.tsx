@@ -1,6 +1,14 @@
 import React, { JSX, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, Card, CardContent, Button, Stack, styled } from "@mui/material";
+import {
+  Box,
+  Card,
+  CardContent,
+  Button,
+  Stack,
+  styled,
+  Typography,
+} from "@mui/material";
 import useQuizStore from "../store/quizStore";
 import quizList from "../const/quiz";
 import useQuizInputStore from "../store/quizInputStore";
@@ -212,9 +220,27 @@ const QuizPage = () => {
       <CenteredBox>
         <CenteredBox>
           <StyledCard className="questionCard" variant="outlined">
-            <CardContent>
+            <CardContent
+              sx={{
+                display: "flex", // フレックスボックスを使用
+                flexDirection: "column", // 縦方向に配置
+                justifyContent: "center", // 水平方向に中央揃え
+                alignItems: "center", // 垂直方向に中央揃え
+                textAlign: "center", // テキストの中央揃え
+              }}
+            >
               <h1>問題</h1>
-              <p>{displayedQuestion}</p>
+              <Typography
+                variant="body1"
+                sx={{
+                  wordWrap: "break-word", // 長い単語を折り返す
+                  width: "530px", // 必要に応じて幅を調整
+                  textAlign: "left",
+                  fontSize: "16px",
+                }}
+              >
+                {displayedQuestion}
+              </Typography>
             </CardContent>
           </StyledCard>
         </CenteredBox>
