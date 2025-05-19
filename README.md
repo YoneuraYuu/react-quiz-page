@@ -27,5 +27,5 @@
 - zustand v5.0.3
 
 # 利用方法
-- 当リポジトリのソースをローカルにcloneし、「react-quiz」フォルダにてnpm run devのコマンドを実行してください。
+- 当リポジトリのソースをローカルにcloneし、「react-quiz」フォルダにて`yarn start`のコマンドを実行してください。
 - 作成したサイトのURLは[こちらになります](https://www.yoneura.com/)
